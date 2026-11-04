@@ -1,4 +1,4 @@
-import { ZeroRAG, FastEmbedProvider } from '../src/index.js';
+import { FastEmbedProvider, ZeroRAG } from '../src/index.js';
 
 async function main() {
     const args = process.argv.slice(2);
@@ -19,36 +19,29 @@ async function main() {
         topK: 5,
     });
 
-    let mode: string | undefined;
+    let mode: 'llm' | 'extractive' | undefined;
     let answer: string;
-    let sources: { label: string; score?: number; url?: string }[] = [];
+    let sources: { label: string; url?: string }[] = [];
 
     try {
         if (command === '--ask') {
             const r = await rag.ask(query);
             mode = r.mode;
             answer = r.answer;
-            sources = r.sources?.map((s: any) => ({
-                label: s.label,
-                score: s.score?.toFixed ? Number(s.score.toFixed(3)) : undefined,
-                url: s.url,
-            })) || [];
+            sources = r.sources.map((s) => ({ label: s.label, url: s.url }));
             console.log('\n=== Extractive Answer ===');
             console.log('Mode:', mode);
             console.log('Answer:', answer);
-            console.log('Sources:', sources.length ? sources.map((s) => `${s.label} (score ${s.score ?? ''})`).join(', ') : 'none');
+            console.log('Sources:', sources.length ? sources.map((s) => s.label).join(', ') : 'none');
         } else if (command === '--asklive') {
             const r = await rag.ask(query, { live: true, maxLivePages: 2 });
             mode = r.mode;
             answer = r.answer;
-            sources = (r.sources || []).map((s: any) => ({
-                label: s.label,
-                url: s.url,
-            }));
+            sources = (r.sources || []).map((s) => ({ label: s.label, url: s.url }));
             console.log('\n=== Live-Grounded Answer ===');
             console.log('Mode:', mode);
             console.log('Answer:', answer);
-            console.log('Sources:', sources.length ? sources.map((s) => `${s.label} — ${s.url ?? ''}`).join(' | ') : 'none');
+            console.log('Sources:', sources.length ? sources.map((s) => s.label).join(' | ') : 'none');
             console.log('Live mode: fresh web results included');
         } else if (command === '--search') {
             const hits = await rag.search(query, 5);
