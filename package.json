@@ -80,7 +80,8 @@
         "debug": "^4.4.3",
         "duck-duck-scrape": "^2.2.7",
         "fast-xml-parser": "^5.12.0",
-        "fastembed": "^3.0.0"
+        "fastembed": "^3.0.0",
+        "zerorag": "^0.1.0"
     },
     "devDependencies": {
         "@biomejs/biome": "2.6.5",
