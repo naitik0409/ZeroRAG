@@ -84,7 +84,7 @@ export class ZeroRAG {
 
     async addText(
         text: string,
-        opts: { source?: string; metadata?: Record<string, unknown> } = {},
+        opts: { source?: string; metadata?: Record<string, unknown>; force?: boolean } = {},
     ): Promise<LoaderResult> {
         const loader = new TextLoader(text, {
             source: opts.source,
@@ -92,12 +92,12 @@ export class ZeroRAG {
             chunkSize: this.options.chunkSize,
             chunkOverlap: this.options.chunkOverlap,
         });
-        return this.addLoader(loader);
+        return this.addLoader(loader, opts.force ?? false);
     }
 
     async addFile(
         path: string,
-        opts: { extensions?: string[]; metadata?: Record<string, unknown> } = {},
+        opts: { extensions?: string[]; metadata?: Record<string, unknown>; force?: boolean } = {},
     ): Promise<LoaderResult> {
         const loader = new FileLoader(path, {
             extensions: opts.extensions,
@@ -105,12 +105,20 @@ export class ZeroRAG {
             chunkSize: this.options.chunkSize,
             chunkOverlap: this.options.chunkOverlap,
         });
-        return this.addLoader(loader);
+        return this.addLoader(loader, opts.force ?? false);
     }
 
     async addLoader(loader: Loader, force = false): Promise<LoaderResult> {
         const loaderId = loader.getUniqueId();
-        if (!force && this.seenLoaders.has(loaderId)) {
+        if (force) {
+            // re-ingest: drop any existing copy first so chunks never duplicate
+            await this.store.deleteByLoader(loaderId);
+            this.seenLoaders.delete(loaderId);
+        } else if (this.seenLoaders.has(loaderId)) {
+            return { loaderId, chunksAdded: 0 };
+        } else if (await this.store.hasLoader?.(loaderId)) {
+            // persistent store already holds this loader from a previous process
+            this.seenLoaders.add(loaderId);
             return { loaderId, chunksAdded: 0 };
         }
         let buffer: Chunk[] = [];

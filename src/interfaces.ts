@@ -15,6 +15,8 @@ export interface VectorStore {
     hybridSearch?(query: string, queryVector: number[], k: number): Promise<ScoredChunk[]>;
     count(): Promise<number>;
     deleteByLoader(loaderId: string): Promise<boolean>;
+    /** Optional: whether a loader's chunks already exist in the store (persistent dedupe across restarts) */
+    hasLoader?(loaderId: string): Promise<boolean>;
     reset(): Promise<void>;
 }
 

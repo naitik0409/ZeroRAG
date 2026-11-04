@@ -169,6 +169,13 @@ export class LanceDBStore implements VectorStore {
         return true;
     }
 
+    async hasLoader(loaderId: string): Promise<boolean> {
+        const table = this.requireTable();
+        const safe = loaderId.replace(/'/g, "''");
+        const rows = await table.query().where(`loaderId = '${safe}'`).limit(1).toArray();
+        return rows.length > 0;
+    }
+
     async reset(): Promise<void> {
         const table = this.requireTable();
         await table.delete('id IS NOT NULL');

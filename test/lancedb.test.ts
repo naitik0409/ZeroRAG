@@ -62,6 +62,26 @@ describe('LanceDBStore (real embedded database)', () => {
         expect(hits[0]?.pageContent).toContain('Persistent');
     });
 
+    it('does not duplicate chunks when re-ingesting after a restart', async () => {
+        await rag.addText('Seeded once, never duplicated on reopen.', { source: 'seed.md' });
+        expect(await rag.getChunkCount()).toBe(1);
+
+        const store2 = new LanceDBStore({ path: dir });
+        const rag2 = await ZeroRAG.create({ embedder: new FakeEmbedder(), store: store2 });
+        const again = await rag2.addText('Seeded once, never duplicated on reopen.', {
+            source: 'seed.md',
+        });
+        expect(again.chunksAdded).toBe(0);
+        expect(await rag2.getChunkCount()).toBe(1);
+
+        const forced = await rag2.addText('Seeded once, never duplicated on reopen.', {
+            source: 'seed.md',
+            force: true,
+        });
+        expect(forced.chunksAdded).toBeGreaterThan(0);
+        expect(await rag2.getChunkCount()).toBe(forced.chunksAdded);
+    });
+
     it('deletes by loader and resets', async () => {
         const { loaderId } = await rag.addText('Temporary facts about zebras.', { source: 'z.md' });
         expect(await rag.getChunkCount()).toBe(1);

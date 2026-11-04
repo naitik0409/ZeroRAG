@@ -67,6 +67,11 @@
         "check": "npm run typecheck && npm run lint && npm run test",
         "example": "tsx examples/basic.ts",
         "example:live": "tsx examples/live.ts",
+        "playground": "tsx examples/playground.ts",
+        "ask": "tsx examples/cli.ts --ask",
+        "asklive": "tsx examples/cli.ts --asklive",
+        "search": "tsx examples/cli.ts --search",
+        "live": "tsx examples/cli.ts --live",
         "prepublishOnly": "npm run check && npm run build"
     },
     "dependencies": {

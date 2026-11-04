@@ -72,6 +72,10 @@ export class MemoryStore implements VectorStore {
         return this.rows.length !== before;
     }
 
+    async hasLoader(loaderId: string): Promise<boolean> {
+        return this.rows.some((row) => row.chunk.metadata.loaderId === loaderId);
+    }
+
     async reset(): Promise<void> {
         this.rows = [];
     }

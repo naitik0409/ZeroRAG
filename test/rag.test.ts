@@ -88,4 +88,28 @@ describe('ZeroRAG pipeline (MemoryStore, zero keys)', () => {
         expect(second.loaderId).toBe(first.loaderId);
         expect(await rag.getChunkCount()).toBe(first.chunksAdded);
     });
+
+    it('deduplicates across instances sharing a store (restart simulation)', async () => {
+        const store = new MemoryStore();
+        const rag1 = await ZeroRAG.create({ embedder: new FakeEmbedder(), store });
+        const first = await rag1.addText('Durable content that should not duplicate.', {
+            source: 'd.md',
+        });
+
+        // new instance = fresh seenLoaders set, same underlying store
+        const rag2 = await ZeroRAG.create({ embedder: new FakeEmbedder(), store });
+        const second = await rag2.addText('Durable content that should not duplicate.', {
+            source: 'd.md',
+        });
+        expect(second.chunksAdded).toBe(0);
+        expect(await rag2.getChunkCount()).toBe(first.chunksAdded);
+
+        // force re-ingests without duplicating
+        const forced = await rag2.addText('Durable content that should not duplicate.', {
+            source: 'd.md',
+            force: true,
+        });
+        expect(forced.chunksAdded).toBeGreaterThan(0);
+        expect(await rag2.getChunkCount()).toBe(first.chunksAdded);
+    });
 });
