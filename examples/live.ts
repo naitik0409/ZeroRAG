@@ -17,15 +17,20 @@ async function main(): Promise<void> {
         freshWithinDays: 7,
     });
     for (const r of results) {
-        console.log(` • ${r.title}\n   ${r.url}${r.date ? `  (${r.date.slice(0, 10)})` : ''}  [${r.provider}]`);
+        console.log(
+            ` • ${r.title}\n   ${r.url}${r.date ? `  (${r.date.slice(0, 10)})` : ''}  [${r.provider}]`,
+        );
     }
 
     console.log('\n── ask({ live: true }) — extractive, zero-LLM ──');
-    const { answer, sources, mode } = await rag.ask('What are the latest space telescope discoveries?', {
-        live: true,
-        maxLivePages: 2,
-        freshWithinDays: 7,
-    });
+    const { answer, sources, mode } = await rag.ask(
+        'What are the latest space telescope discoveries?',
+        {
+            live: true,
+            maxLivePages: 2,
+            freshWithinDays: 7,
+        },
+    );
     console.log(`mode: ${mode}`);
     console.log(answer.split('\n').slice(0, 8).join('\n'));
     console.log('\nsources:');

@@ -26,6 +26,13 @@ export interface LiveSearchOptions_ {
     freshWithinDays?: number;
 }
 
+/** needle has no default timeouts — bound every DDG request so callers never hang. */
+const NEEDLE_TIMEOUTS = {
+    open_timeout: 10_000,
+    response_timeout: 15_000,
+    read_timeout: 15_000,
+} as const;
+
 /**
  * Keyless DuckDuckGo provider (web + news). No API key, no signup.
  * Includes a per-instance rate-limit guard — DDG throttles aggressive callers.
@@ -45,10 +52,14 @@ export class DuckDuckGoProvider implements SearchProvider {
 
     async search(query: string, opts: LiveSearchOptions_ = {}): Promise<SearchResult[]> {
         await this.throttle();
-        const result = await ddgSearch(query, {
-            safeSearch: this.options.safeSearch ?? SafeSearchType.MODERATE,
-            ...(opts.freshWithinDays ? { time: daysToTimeType(opts.freshWithinDays) } : {}),
-        });
+        const result = await ddgSearch(
+            query,
+            {
+                safeSearch: this.options.safeSearch ?? SafeSearchType.MODERATE,
+                ...(opts.freshWithinDays ? { time: daysToTimeType(opts.freshWithinDays) } : {}),
+            },
+            NEEDLE_TIMEOUTS,
+        );
 
         return result.results.slice(0, opts.maxResults ?? 8).map((r) => ({
             title: r.title,
@@ -64,9 +75,13 @@ export class DuckDuckGoProvider implements SearchProvider {
         opts: { maxResults?: number; freshWithinDays?: number } = {},
     ): Promise<SearchResult[]> {
         await this.throttle();
-        const result = await searchNews(query, {
-            ...(opts.freshWithinDays ? { time: daysToTimeType(opts.freshWithinDays) } : {}),
-        });
+        const result = await searchNews(
+            query,
+            {
+                ...(opts.freshWithinDays ? { time: daysToTimeType(opts.freshWithinDays) } : {}),
+            },
+            NEEDLE_TIMEOUTS,
+        );
 
         return result.results.slice(0, opts.maxResults ?? 8).map((r) => ({
             title: r.title,

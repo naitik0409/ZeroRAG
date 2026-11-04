@@ -19,6 +19,8 @@ export interface LiveSearchConfig {
     maxPageChars?: number;
     /** Page fetch timeout, ms. Default: 10_000 */
     pageTimeoutMs?: number;
+    /** Per-provider search timeout, ms. Default: 15_000 */
+    providerTimeoutMs?: number;
     fetchImpl?: typeof fetch;
 }
 
@@ -28,10 +30,11 @@ export interface FetchPageResult {
     text: string;
 }
 
-const USER_AGENT = 'zerorag/0.1 (+https://github.com/zerorag/zerorag; keyless live search)';
+const USER_AGENT = 'zerorag/0.1 (https://github.com/naitik0409/ZeroRAG; keyless live search)';
 const DEFAULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const DEFAULT_BREAKER_THRESHOLD = 3;
 const DEFAULT_BREAKER_COOLDOWN_MS = 60 * 1000;
+const DEFAULT_PROVIDER_TIMEOUT_MS = 15_000;
 
 interface ProviderState {
     consecutiveFailures: number;
@@ -80,11 +83,26 @@ export class LiveSearch {
             maxResults: config.maxResults ?? 8,
             maxPageChars: config.maxPageChars ?? 20_000,
             pageTimeoutMs: config.pageTimeoutMs ?? 10_000,
+            providerTimeoutMs: config.providerTimeoutMs ?? DEFAULT_PROVIDER_TIMEOUT_MS,
         };
     }
 
     private cacheKey(query: string, freshWithinDays?: number): string {
         return `${query}::${freshWithinDays ?? 'any'}`;
+    }
+
+    private async withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        try {
+            return await Promise.race([
+                promise,
+                new Promise<never>((_, reject) => {
+                    timer = setTimeout(() => reject(new Error(message)), ms);
+                }),
+            ]);
+        } finally {
+            if (timer) clearTimeout(timer);
+        }
     }
 
     private isCircuitOpen(provider: SearchProvider): boolean {
@@ -130,10 +148,14 @@ export class LiveSearch {
                     throw new Error(`circuit-open: ${provider.name}`);
                 }
                 try {
-                    const results = await provider.search(query, {
-                        maxResults: this.config.maxResults,
-                        freshWithinDays: opts.freshWithinDays,
-                    });
+                    const results = await this.withTimeout(
+                        provider.search(query, {
+                            maxResults: this.config.maxResults,
+                            freshWithinDays: opts.freshWithinDays,
+                        }),
+                        this.config.providerTimeoutMs,
+                        `${provider.name} timed out after ${this.config.providerTimeoutMs}ms`,
+                    );
                     this.recordSuccess(provider);
                     return results;
                 } catch (error) {

@@ -87,6 +87,7 @@ export class RssProvider implements SearchProvider {
                             'user-agent': USER_AGENT,
                             accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml',
                         },
+                        signal: AbortSignal.timeout(10_000),
                     });
                     if (!res.ok) return;
                     const xml = await res.text();

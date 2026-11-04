@@ -30,6 +30,7 @@ export class WikipediaProvider implements SearchProvider {
 
         const res = await this.fetchImpl(url, {
             headers: { 'user-agent': USER_AGENT, accept: 'application/json' },
+            signal: AbortSignal.timeout(10_000),
         });
         if (!res.ok) throw new Error(`Wikipedia search failed (${res.status})`);
 

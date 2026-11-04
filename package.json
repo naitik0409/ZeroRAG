@@ -1,7 +1,7 @@
 {
     "name": "zerorag",
     "version": "0.1.0",
-    "description": "Free realtime RAG for Node.js â€” local embeddings, embedded LanceDB hybrid search, keyless web sources, bring-your-own LLM. $0 forever.",
+    "description": "Free realtime RAG for Node.js — local embeddings, embedded LanceDB hybrid search, keyless web sources, bring-your-own LLM. $0 forever.",
     "keywords": [
         "rag",
         "retrieval-augmented-generation",
@@ -65,7 +65,8 @@
         "lint:fix": "biome check --write --unsafe .",
         "format": "biome format --write .",
         "check": "npm run typecheck && npm run lint && npm run test",
-        "example": "tsx examples/basic.ts",`n        "example:live": "tsx examples/live.ts",
+        "example": "tsx examples/basic.ts",
+        "example:live": "tsx examples/live.ts",
         "prepublishOnly": "npm run check && npm run build"
     },
     "dependencies": {
