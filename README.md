@@ -31,7 +31,7 @@ Requires **Node.js ≥ 18**. Everything runs locally — no API keys required at
 ```ts
 import { ZeroRAG } from 'zerorag';
 
-const rag = await ZeroRAG.create();          // local embeddings + embedded LanceDB
+const rag = await ZeroRAG.create(); // local embeddings + embedded LanceDB
 
 await rag.addText('TypeScript is a typed superset of JavaScript.', { source: 'ts.md' });
 await rag.addFile('./docs/manual.md');
@@ -40,22 +40,22 @@ const hits = await rag.search('What is TypeScript?');
 // → [{ pageContent, score, metadata: { source: 'ts.md' } }, ...]
 
 const { answer, sources } = await rag.ask('What is TypeScript?');
-console.log(answer);                          // extractive answer, no LLM needed
-console.log(sources);                         // numbered citations with URLs
+console.log(answer); // extractive answer, no LLM needed
+console.log(sources); // numbered citations with URLs
 ```
 
 ### Realtime answers from the live web
 
 ```ts
-const rag = await ZeroRAG.create({ live: true });   // keyless: DuckDuckGo + Wikipedia
+const rag = await ZeroRAG.create({ live: true }); // keyless: DuckDuckGo + Wikipedia
 
 const results = await rag.searchLive('aurora forecast tonight');
 // → [{ title, url, snippet, date?, provider }, ...]  (RRF-fused, cached, rate-limited)
 
 const { answer, sources } = await rag.ask('Where can I see the aurora tonight?', {
-    live: true,             // grounds the answer in fresh web pages
-    maxLivePages: 3,        // fetch + extract up to 3 pages
-    freshWithinDays: 7,     // DDG freshness filter
+    live: true, // grounds the answer in fresh web pages
+    maxLivePages: 3, // fetch + extract up to 3 pages
+    freshWithinDays: 7, // DDG freshness filter
 });
 ```
 
@@ -71,10 +71,13 @@ const rag = await ZeroRAG.create({ llm: new OllamaAdapter({ model: 'llama3.1' })
 
 // Or any OpenAI-compatible endpoint (OpenAI, Together, Groq, LM Studio, vLLM...):
 const rag2 = await ZeroRAG.create({
-    llm: new OpenAICompatibleAdapter({ apiKey: process.env.API_KEY, baseUrl: 'https://api.openai.com/v1' }),
+    llm: new OpenAICompatibleAdapter({
+        apiKey: process.env.API_KEY,
+        baseUrl: 'https://api.openai.com/v1',
+    }),
 });
 
-const { answer, mode } = await rag.ask('Explain the architecture');  // mode: 'llm'
+const { answer, mode } = await rag.ask('Explain the architecture'); // mode: 'llm'
 ```
 
 No LLM configured? `ask()` automatically runs in **extractive mode** — it picks the most query-relevant sentences from retrieved chunks. Free, instant, offline.
@@ -85,49 +88,49 @@ No LLM configured? `ask()` automatically runs in **extractive mode** — it pick
 
 ### `ZeroRAG.create(options?) → Promise<ZeroRAG>`
 
-| Option | Default | Description |
-|---|---|---|
-| `embedder` | `FastEmbedProvider` | Any `EmbeddingProvider` (local by default) |
-| `store` | `LanceDBStore` (`./.zerorag`) | Any `VectorStore`; `MemoryStore` for tests |
-| `llm` | — | Any `LLMAdapter`; omit for extractive mode |
-| `live` | `false` | `true` or `LiveSearchConfig` to enable realtime search |
-| `chunkSize` / `chunkOverlap` | `500` / `100` | Chunking for `addText` / `addFile` |
-| `topK` | `5` | Default retrieval depth |
-| `systemMessage` | helpful-assistant | LLM system prompt |
-| `maxExtractiveSentences` | `5` | Extractive answer length cap |
+| Option                       | Default                       | Description                                            |
+| ---------------------------- | ----------------------------- | ------------------------------------------------------ |
+| `embedder`                   | `FastEmbedProvider`           | Any `EmbeddingProvider` (local by default)             |
+| `store`                      | `LanceDBStore` (`./.zerorag`) | Any `VectorStore`; `MemoryStore` for tests             |
+| `llm`                        | —                             | Any `LLMAdapter`; omit for extractive mode             |
+| `live`                       | `false`                       | `true` or `LiveSearchConfig` to enable realtime search |
+| `chunkSize` / `chunkOverlap` | `500` / `100`                 | Chunking for `addText` / `addFile`                     |
+| `topK`                       | `5`                           | Default retrieval depth                                |
+| `systemMessage`              | helpful-assistant             | LLM system prompt                                      |
+| `maxExtractiveSentences`     | `5`                           | Extractive answer length cap                           |
 
 ### Methods
 
-| Method | Description |
-|---|---|
-| `addText(text, { source?, metadata? })` | Ingest a string → chunks → vectors → store |
-| `addFile(path, { extensions?, metadata? })` | Ingest a file (md, txt, html, ...) |
-| `addLoader(loader, force?)` | Custom `Loader`; deduped by `getUniqueId()` |
-| `search(query, k?)` | Hybrid retrieval → `ScoredChunk[]` |
-| `searchLive(query, { maxResults?, freshWithinDays? })` | Keyless web search → `SearchResult[]` |
-| `ask(query, { live?, maxLivePages?, ... })` | Answer with citations → `{ answer, mode, sources, chunks }` |
-| `getChunkCount()` / `deleteLoader(id)` / `reset()` | Store management |
+| Method                                                 | Description                                                 |
+| ------------------------------------------------------ | ----------------------------------------------------------- |
+| `addText(text, { source?, metadata? })`                | Ingest a string → chunks → vectors → store                  |
+| `addFile(path, { extensions?, metadata? })`            | Ingest a file (md, txt, html, ...)                          |
+| `addLoader(loader, force?)`                            | Custom `Loader`; deduped by `getUniqueId()`                 |
+| `search(query, k?)`                                    | Hybrid retrieval → `ScoredChunk[]`                          |
+| `searchLive(query, { maxResults?, freshWithinDays? })` | Keyless web search → `SearchResult[]`                       |
+| `ask(query, { live?, maxLivePages?, ... })`            | Answer with citations → `{ answer, mode, sources, chunks }` |
+| `getChunkCount()` / `deleteLoader(id)` / `reset()`     | Store management                                            |
 
 ### LLM adapters
 
-| Adapter | Endpoint | Streaming |
-|---|---|---|
-| `OpenAICompatibleAdapter` | OpenAI, Together, Groq, LM Studio, vLLM... | ✅ SSE |
-| `OllamaAdapter` | `http://localhost:11434` | ✅ NDJSON |
-| `AnthropicAdapter` | Claude API | ✅ SSE |
-| `GeminiAdapter` | Google Gemini API | — |
-| `FunctionAdapter` | any function (Vercel AI SDK bridge) | — |
+| Adapter                   | Endpoint                                   | Streaming |
+| ------------------------- | ------------------------------------------ | --------- |
+| `OpenAICompatibleAdapter` | OpenAI, Together, Groq, LM Studio, vLLM... | ✅ SSE    |
+| `OllamaAdapter`           | `http://localhost:11434`                   | ✅ NDJSON |
+| `AnthropicAdapter`        | Claude API                                 | ✅ SSE    |
+| `GeminiAdapter`           | Google Gemini API                          | —         |
+| `FunctionAdapter`         | any function (Vercel AI SDK bridge)        | —         |
 
 All adapters take `{ model?, apiKey?, baseUrl?, fetchImpl? }` — `fetchImpl` makes them fully mockable in tests.
 
 ### Live search providers
 
-| Provider | Keyless | Notes |
-|---|---|---|
-| `DuckDuckGoProvider` | ✅ | Web + `searchNews()` (dated articles), rate-limited |
-| `WikipediaProvider` | ✅ | MediaWiki API, any language |
-| `RssProvider` | ✅ | Your feed URLs (e.g. Google News RSS), relevance + recency ranking |
-| custom `SearchProvider` | — | Just implement `{ name, search(query, opts) }` |
+| Provider                | Keyless | Notes                                                              |
+| ----------------------- | ------- | ------------------------------------------------------------------ |
+| `DuckDuckGoProvider`    | ✅      | Web + `searchNews()` (dated articles), rate-limited                |
+| `WikipediaProvider`     | ✅      | MediaWiki API, any language                                        |
+| `RssProvider`           | ✅      | Your feed URLs (e.g. Google News RSS), relevance + recency ranking |
+| custom `SearchProvider` | —       | Just implement `{ name, search(query, opts) }`                     |
 
 Compose them via `new LiveSearch({ providers: [...] })` or `ZeroRAG.create({ live: { providers: [...] } })`.
 
@@ -161,14 +164,14 @@ Everything behind an interface (`EmbeddingProvider`, `VectorStore`, `LLMAdapter`
 
 ## Why zerorag?
 
-| | zerorag | LangChain + hosted APIs | EmbedJs |
-|---|---|---|---|
-| API cost | **$0** | per-token / per-request | $0 (no LLM) |
-| Embeddings | local (fastembed) | often hosted | local |
-| Vector store | embedded LanceDB | varies | LanceDB* |
-| Realtime web (keyless) | ✅ DDG/Wikipedia/RSS | needs API keys | ❌ |
-| LLM | bring-your-own / none | required | none |
-| Setup | `npm i zerorag` | multi-package | Nx monorepo |
+|                        | zerorag               | LangChain + hosted APIs | EmbedJs     |
+| ---------------------- | --------------------- | ----------------------- | ----------- |
+| API cost               | **$0**                | per-token / per-request | $0 (no LLM) |
+| Embeddings             | local (fastembed)     | often hosted            | local       |
+| Vector store           | embedded LanceDB      | varies                  | LanceDB*    |
+| Realtime web (keyless) | ✅ DDG/Wikipedia/RSS  | needs API keys          | ❌          |
+| LLM                    | bring-your-own / none | required                | none        |
+| Setup                  | `npm i zerorag`       | multi-package           | Nx monorepo |
 
 \* upstream LanceDB adapter used placeholder vectors — zerorag's is a full rewrite with native vectors, cosine, and hybrid FTS+RRF.
 

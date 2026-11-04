@@ -1,7 +1,7 @@
-{
+﻿{
     "name": "zerorag",
     "version": "0.1.0",
-    "description": "Free realtime RAG for Node.js — local embeddings, embedded LanceDB hybrid search, keyless web sources, bring-your-own LLM. $0 forever.",
+    "description": "Free realtime RAG for Node.js â€” local embeddings, embedded LanceDB hybrid search, keyless web sources, bring-your-own LLM. $0 forever.",
     "keywords": [
         "rag",
         "retrieval-augmented-generation",
@@ -9,11 +9,30 @@
         "embeddings",
         "vector-search",
         "lancedb",
+        "hybrid-search",
+        "realtime",
+        "duckduckgo",
+        "wikipedia",
+        "rss",
         "local-first",
-        "llm"
+        "open-source",
+        "llm",
+        "ollama",
+        "openai",
+        "free"
     ],
+    "author": "Naitik Shrivastava",
     "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/naitik0409/ZeroRAG.git"
+    },
+    "homepage": "https://github.com/naitik0409/ZeroRAG#readme",
+    "bugs": {
+        "url": "https://github.com/naitik0409/ZeroRAG/issues"
+    },
     "type": "module",
+    "sideEffects": false,
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -27,8 +46,13 @@
     "files": [
         "dist",
         "LICENSE",
-        "NOTICE"
+        "NOTICE",
+        "README.md",
+        "CHANGELOG.md"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "engines": {
         "node": ">=18"
     },
@@ -37,8 +61,12 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "typecheck": "tsc --noEmit",
-        "example": "tsx examples/basic.ts",
-        "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+        "lint": "biome check .",
+        "lint:fix": "biome check --write --unsafe .",
+        "format": "biome format --write .",
+        "check": "npm run typecheck && npm run lint && npm run test",
+        "example": "tsx examples/basic.ts",`n    "example:live": "tsx examples/live.ts",
+        "prepublishOnly": "npm run check && npm run build"
     },
     "dependencies": {
         "@lancedb/lancedb": "^0.41.0",

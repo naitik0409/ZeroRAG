@@ -1,4 +1,4 @@
-# Contributing to zerorag
+﻿# Contributing to zerorag
 
 Thanks for your interest in improving zerorag! This document explains the workflow and quality gates.
 
@@ -11,7 +11,7 @@ Thanks for your interest in improving zerorag! This document explains the workfl
 ## Getting started
 
 ```bash
-git clone https://github.com/<you>/zerorag
+git clone https://github.com/naitik0409/ZeroRAG
 cd zerorag
 npm install
 npm run test        # must pass before you change anything
@@ -28,20 +28,20 @@ npm run test        # must pass before you change anything
    npm run typecheck && npm run lint && npm run test && npm run build
    ```
 
-5. Open a PR with a clear description of *what* changed and *why*.
+5. Open a PR with a clear description of _what_ changed and _why_.
 
 ## Quality gates (enforced in CI)
 
-| Gate | Command |
-|---|---|
+| Gate                                        | Command             |
+| ------------------------------------------- | ------------------- |
 | Types (strict + `noUncheckedIndexedAccess`) | `npm run typecheck` |
-| Lint + format | `npm run lint` |
-| Tests (offline, deterministic) | `npm run test` |
-| Build (ESM + CJS + d.ts) | `npm run build` |
+| Lint + format                               | `npm run lint`      |
+| Tests (offline, deterministic)              | `npm run test`      |
+| Build (ESM + CJS + d.ts)                    | `npm run build`     |
 
 ## Adding a live search provider
 
-Implement the `SearchProvider` interface — nothing else is needed:
+Implement the `SearchProvider` interface â€” nothing else is needed:
 
 ```ts
 import type { SearchProvider, SearchResult } from 'zerorag';
@@ -56,7 +56,7 @@ export class MyProvider implements SearchProvider {
 }
 ```
 
-Then wire it into `new LiveSearch({ providers: [new MyProvider()] })`. Add a test with a mocked `fetchImpl` — never hit the network in the default test suite.
+Then wire it into `new LiveSearch({ providers: [new MyProvider()] })`. Add a test with a mocked `fetchImpl` â€” never hit the network in the default test suite.
 
 ## Adding an LLM adapter
 
@@ -68,4 +68,4 @@ Conventional commits preferred: `feat:`, `fix:`, `docs:`, `test:`, `chore:`, `re
 
 ## Questions
 
-Open a discussion issue. Maintainer response time is best-effort — this is a free, community project.
+Open a discussion issue. Maintainer response time is best-effort â€” this is a free, community project.
