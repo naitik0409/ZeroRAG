@@ -28,11 +28,14 @@ async function main() {
             const r = await rag.ask(query);
             mode = r.mode;
             answer = r.answer;
-            sources = r.sources.map((s) => ({ label: s.label, url: s.url }));
+            sources = (r.sources ?? []).map((s) => ({ label: s.label, url: s.url }));
             console.log('\n=== Extractive Answer ===');
             console.log('Mode:', mode);
             console.log('Answer:', answer);
-            console.log('Sources:', sources.length ? sources.map((s) => s.label).join(', ') : 'none');
+            console.log(
+                'Sources:',
+                sources.length ? sources.map((s) => s.label).join(', ') : 'none',
+            );
         } else if (command === '--asklive') {
             const r = await rag.ask(query, { live: true, maxLivePages: 2 });
             mode = r.mode;
@@ -41,7 +44,10 @@ async function main() {
             console.log('\n=== Live-Grounded Answer ===');
             console.log('Mode:', mode);
             console.log('Answer:', answer);
-            console.log('Sources:', sources.length ? sources.map((s) => s.label).join(' | ') : 'none');
+            console.log(
+                'Sources:',
+                sources.length ? sources.map((s) => s.label).join(' | ') : 'none',
+            );
             console.log('Live mode: fresh web results included');
         } else if (command === '--search') {
             const hits = await rag.search(query, 5);
