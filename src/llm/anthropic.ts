@@ -67,7 +67,8 @@ export class AnthropicAdapter implements LLMAdapter {
         const data = (await res.json()) as AnthropicResponse;
         if (data.error?.message) throw new Error(`Anthropic error: ${data.error.message}`);
         const text = data.content?.find((b) => b.type === 'text')?.text;
-        if (typeof text !== 'string') throw new Error('Anthropic response missing content text block');
+        if (typeof text !== 'string')
+            throw new Error('Anthropic response missing content text block');
         return text;
     }
 
@@ -81,7 +82,9 @@ export class AnthropicAdapter implements LLMAdapter {
         });
         if (!res.ok || !res.body) {
             const text = await res.text().catch(() => '');
-            throw new Error(`Anthropic stream request failed (${res.status}): ${text.slice(0, 300)}`);
+            throw new Error(
+                `Anthropic stream request failed (${res.status}): ${text.slice(0, 300)}`,
+            );
         }
 
         const reader = res.body.getReader();
@@ -97,7 +100,10 @@ export class AnthropicAdapter implements LLMAdapter {
                 if (!line.startsWith('data:')) continue;
                 const payload = line.slice(5).trim();
                 try {
-                    const event = JSON.parse(payload) as { type?: string; delta?: { text?: string } };
+                    const event = JSON.parse(payload) as {
+                        type?: string;
+                        delta?: { text?: string };
+                    };
                     if (event.type === 'content_block_delta' && event.delta?.text) {
                         yield event.delta.text;
                     }

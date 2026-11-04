@@ -48,5 +48,8 @@ export interface Loader {
 
 export interface SearchProvider {
     readonly name: string;
-    search(query: string, opts?: { maxResults?: number }): Promise<SearchResult[]>;
+    search(
+        query: string,
+        opts?: { maxResults?: number; freshWithinDays?: number },
+    ): Promise<SearchResult[]>;
 }

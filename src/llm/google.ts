@@ -44,7 +44,9 @@ export class GeminiAdapter implements LLMAdapter {
     }
 
     async complete(messages: ChatMessage[], opts?: LLMOptions): Promise<string> {
-        const base = (this.options.baseUrl ?? 'https://generativelanguage.googleapis.com/v1beta').replace(/\/$/, '');
+        const base = (
+            this.options.baseUrl ?? 'https://generativelanguage.googleapis.com/v1beta'
+        ).replace(/\/$/, '');
         const url = `${base}/models/${this.options.model}:generateContent?key=${encodeURIComponent(this.options.apiKey)}`;
         const doFetch = this.options.fetchImpl ?? fetch;
         const res = await doFetch(url, {

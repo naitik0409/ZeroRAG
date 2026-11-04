@@ -83,7 +83,9 @@ export function rrfFusion(lists: ScoredChunk[][], k: number, rrfK = 60): ScoredC
 
     for (const list of lists) {
         list.forEach((chunk, rank) => {
-            const key = String(chunk.metadata.id ?? `${chunk.metadata.source}#${chunk.pageContent.slice(0, 64)}`);
+            const key = String(
+                chunk.metadata.id ?? `${chunk.metadata.source}#${chunk.pageContent.slice(0, 64)}`,
+            );
             const add = 1 / (rrfK + rank + 1);
             const existing = fused.get(key);
             if (existing) {

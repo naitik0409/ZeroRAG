@@ -20,7 +20,8 @@ describe('splitSentences', () => {
 describe('extractiveAnswer', () => {
     const chunks: ScoredChunk[] = [
         {
-            pageContent: 'The solar system has eight planets. Pluto is a dwarf planet. Mercury is closest to the sun.',
+            pageContent:
+                'The solar system has eight planets. Pluto is a dwarf planet. Mercury is closest to the sun.',
             metadata: { source: 'space.md' },
             score: 0.9,
         },
@@ -38,13 +39,19 @@ describe('extractiveAnswer', () => {
     });
 
     it('picks sentences relevant to the query', async () => {
-        const result = await extractiveAnswer('How many planets are in the solar system?', chunks, new FakeEmbedder());
+        const result = await extractiveAnswer(
+            'How many planets are in the solar system?',
+            chunks,
+            new FakeEmbedder(),
+        );
         expect(result.answer).toContain('solar system');
         expect(result.usedChunks).toContain(0);
     });
 
     it('respects maxSentences', async () => {
-        const result = await extractiveAnswer('planets', chunks, new FakeEmbedder(), { maxSentences: 1 });
+        const result = await extractiveAnswer('planets', chunks, new FakeEmbedder(), {
+            maxSentences: 1,
+        });
         const sentenceCount = result.answer.split(/[.!?]/).filter((s) => s.trim()).length;
         expect(sentenceCount).toBeLessThanOrEqual(2);
     });

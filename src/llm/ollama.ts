@@ -35,7 +35,14 @@ export class OllamaAdapter implements LLMAdapter {
             body.options = { ...(body.options as object), num_predict: opts.maxTokens };
         }
         const url = `${(this.options.baseUrl ?? 'http://localhost:11434').replace(/\/$/, '')}/api/chat`;
-        return { url, init: { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } as RequestInit };
+        return {
+            url,
+            init: {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+            } as RequestInit,
+        };
     }
 
     async complete(messages: ChatMessage[], opts?: LLMOptions): Promise<string> {

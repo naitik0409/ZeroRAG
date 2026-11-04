@@ -18,7 +18,10 @@ export function cosineSimilarity(a: readonly number[], b: readonly number[]): nu
 }
 
 /** Convert a distance returned by LanceDB into a 0..1-ish similarity score. */
-export function distanceToScore(distance: number, distanceType: 'cosine' | 'l2' = 'cosine'): number {
+export function distanceToScore(
+    distance: number,
+    distanceType: 'cosine' | 'l2' = 'cosine',
+): number {
     if (!Number.isFinite(distance)) return 0;
     if (distanceType === 'cosine') {
         // cosine distance = 1 - cosine similarity

@@ -1,8 +1,7 @@
 import { createHash } from 'node:crypto';
-
+import { type ChunkingOptions, splitText } from '../core/chunker.js';
 import type { Loader } from '../interfaces.js';
 import type { Chunk } from '../types.js';
-import { DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE, splitText, type ChunkingOptions } from '../core/chunker.js';
 
 export interface TextLoaderOptions extends ChunkingOptions {
     source?: string;

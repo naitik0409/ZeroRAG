@@ -4,15 +4,15 @@
 
 ## 1. Locked decisions
 
-| Decision | Choice |
-|---|---|
-| Approach | Fork an open-source RAG, fix/upgrade/mod it — not from scratch |
-| Base project | `llm-tools/embedJs` (601★, Apache-2.0, Nx monorepo: loaders, chunkers, vector stores, model adapters) |
-| LLM | **No bundled LLM.** Pluggable `LLMAdapter` — adapts to whatever LLM/API the user's project has (OpenAI-compatible, Ollama, Groq, Anthropic, Vercel AI SDK…). Plus zero-LLM **extractive mode** for out-of-the-box use |
-| Realtime layer | **Keyless sources only by default**: DuckDuckGo, Wikipedia, RSS/Atom, direct page extraction |
-| Runtime | Node.js 18+ first (browser later) |
-| Cost | $0 forever: local ONNX embeddings, embedded LanceDB, keyless search, user's own LLM |
-| Output | Published npm package usable in any project |
+| Decision       | Choice                                                                                                                                                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Approach       | Fork an open-source RAG, fix/upgrade/mod it — not from scratch                                                                                                                                                        |
+| Base project   | `llm-tools/embedJs` (601★, Apache-2.0, Nx monorepo: loaders, chunkers, vector stores, model adapters)                                                                                                                 |
+| LLM            | **No bundled LLM.** Pluggable `LLMAdapter` — adapts to whatever LLM/API the user's project has (OpenAI-compatible, Ollama, Groq, Anthropic, Vercel AI SDK…). Plus zero-LLM **extractive mode** for out-of-the-box use |
+| Realtime layer | **Keyless sources only by default**: DuckDuckGo, Wikipedia, RSS/Atom, direct page extraction                                                                                                                          |
+| Runtime        | Node.js 18+ first (browser later)                                                                                                                                                                                     |
+| Cost           | $0 forever: local ONNX embeddings, embedded LanceDB, keyless search, user's own LLM                                                                                                                                   |
+| Output         | Published npm package usable in any project                                                                                                                                                                           |
 
 ## 2. Target architecture
 
@@ -53,14 +53,14 @@
 
 ## 4. Strategy — phased execution
 
-| Phase | Goal | Exit gate |
-|---|---|---|
-| **P0 — Acquire & audit** | Clone embedJs, inventory what we keep, smoke-test LanceDB + local ONNX embeddings on this machine, verify npm name | Smoke test green |
-| **P1 — Free core** | New core pipeline: local embedder + LanceDB hybrid search + citations; strip paid defaults | `ingest → ask` works with zero keys |
-| **P2 — LLM-agnostic layer** | `LLMAdapter` + adapters (openai-compat, ollama, anthropic, google, vercel-ai, custom fn), streaming, extractive no-LLM mode | Answer from 3 different LLM configs + extractive mode |
-| **P3 — Realtime layer** | DDG/Wikipedia/RSS providers, page extraction, freshness scoring, cache + rate-limit + circuit-breaker + fallback | "Latest news about X" returns dated fresh sources, no API key |
-| **P4 — Agentic quality** | Freshness routing, query rewriting/multi-query, relevance judge, optional local reranker, structured results | Eval set passes |
-| **P5 — DX & publish** | CLI, `defineConfig`, docs/examples, ESM+CJS, peerDeps, changesets → npm publish v1.0 | `npx zerorag init` → working demo |
+| Phase                       | Goal                                                                                                                        | Exit gate                                                     |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **P0 — Acquire & audit**    | Clone embedJs, inventory what we keep, smoke-test LanceDB + local ONNX embeddings on this machine, verify npm name          | Smoke test green                                              |
+| **P1 — Free core**          | New core pipeline: local embedder + LanceDB hybrid search + citations; strip paid defaults                                  | `ingest → ask` works with zero keys                           |
+| **P2 — LLM-agnostic layer** | `LLMAdapter` + adapters (openai-compat, ollama, anthropic, google, vercel-ai, custom fn), streaming, extractive no-LLM mode | Answer from 3 different LLM configs + extractive mode         |
+| **P3 — Realtime layer**     | DDG/Wikipedia/RSS providers, page extraction, freshness scoring, cache + rate-limit + circuit-breaker + fallback            | "Latest news about X" returns dated fresh sources, no API key |
+| **P4 — Agentic quality**    | Freshness routing, query rewriting/multi-query, relevance judge, optional local reranker, structured results                | Eval set passes                                               |
+| **P5 — DX & publish**       | CLI, `defineConfig`, docs/examples, ESM+CJS, peerDeps, changesets → npm publish v1.0                                        | `npx zerorag init` → working demo                             |
 
 **Post-v1 backlog:** browser build, MCP server package, GraphRAG, scheduled watchers, Qdrant/pgvector adapters.
 
@@ -70,13 +70,13 @@ TypeScript strict · adapters in separate folders · heavy optionals as `peerDep
 
 ## 6. Risks & mitigations
 
-| Risk | Mitigation |
-|---|---|
+| Risk                                      | Mitigation                                                                                           |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | DDG unofficial endpoints break/rate-limit | Multi-source fallback (Wikipedia/RSS), circuit breakers, cache; pluggable providers (SearXNG/Tavily) |
-| embedJs code sprawl / stale deps | Audit-and-port in P0 — inventory what we keep, don't blind-merge |
-| `onnxruntime-node` native-install issues | Optional/peer layer; user-provided embedder always works |
-| npm name collision | Verified available in P0; re-verify before publish |
-| Apache-2.0 obligations | Keep LICENSE + NOTICE in published package |
+| embedJs code sprawl / stale deps          | Audit-and-port in P0 — inventory what we keep, don't blind-merge                                     |
+| `onnxruntime-node` native-install issues  | Optional/peer layer; user-provided embedder always works                                             |
+| npm name collision                        | Verified available in P0; re-verify before publish                                                   |
+| Apache-2.0 obligations                    | Keep LICENSE + NOTICE in published package                                                           |
 
 ## 7. Immediate execution steps (P0)
 
@@ -88,11 +88,13 @@ TypeScript strict · adapters in separate folders · heavy optionals as `peerDep
 ## 8. P0 AUDIT RESULTS (2026-11-04)
 
 **Smoke test: GREEN**
+
 - `fastembed` bge-small-en-v1.5: 384-dim vectors, 3.5s warm init, no API key
 - LanceDB: vector search ✓, FTS index ✓ (`createIndex(col,{config:Index.fts()})` + `search(q,"fts",[col])`)
 - Note: npm 11 blocks install scripts by default (`npm approve-scripts`); onnxruntime works anyway
 
 **Upstream structure (40 packages, Nx monorepo):**
+
 - `core/embedjs-interfaces` — BaseLoader, BaseEmbeddings, BaseModel, BaseStore, BaseVectorDatabase ✓ port shapes
 - `core/embedjs` — RAGApplication orchestrator (addLoader→chunk→embed→insert; search→query w/ sources) ✓ port pattern
 - `core/embedjs-utils` — cleanString, truncate, arrays, web utils ✓ port

@@ -15,9 +15,12 @@ describe('ZeroRAG pipeline (MemoryStore, zero keys)', () => {
 
     it('ingests text and retrieves the relevant chunk', async () => {
         const rag = await makeRag();
-        await rag.addText('TypeScript is a typed superset of JavaScript that compiles to plain JS.', {
-            source: 'ts.md',
-        });
+        await rag.addText(
+            'TypeScript is a typed superset of JavaScript that compiles to plain JS.',
+            {
+                source: 'ts.md',
+            },
+        );
         await rag.addText('Bananas are yellow fruits rich in potassium.', { source: 'fruit.md' });
 
         const hits = await rag.search('What is TypeScript?');
@@ -46,7 +49,9 @@ describe('ZeroRAG pipeline (MemoryStore, zero keys)', () => {
     it('answers through the LLM adapter when configured', async () => {
         const llm = new FakeLLM();
         const rag = await makeRag(llm);
-        await rag.addText('Node.js is an asynchronous event-driven JavaScript runtime.', { source: 'node.md' });
+        await rag.addText('Node.js is an asynchronous event-driven JavaScript runtime.', {
+            source: 'node.md',
+        });
 
         const result = await rag.ask('What is Node.js?');
         expect(result.mode).toBe('llm');
@@ -59,9 +64,12 @@ describe('ZeroRAG pipeline (MemoryStore, zero keys)', () => {
 
     it('counts chunks, deletes by loader, and resets', async () => {
         const rag = await makeRag();
-        const { loaderId, chunksAdded } = await rag.addText('Alpha beta gamma. Delta epsilon zeta.', {
-            source: 'a.md',
-        });
+        const { loaderId, chunksAdded } = await rag.addText(
+            'Alpha beta gamma. Delta epsilon zeta.',
+            {
+                source: 'a.md',
+            },
+        );
         expect(chunksAdded).toBeGreaterThan(0);
         expect(await rag.getChunkCount()).toBe(chunksAdded);
 

@@ -1,12 +1,21 @@
 import { createHash } from 'node:crypto';
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { readdir, readFile, stat } from 'node:fs/promises';
 import { extname, join, relative, resolve } from 'node:path';
-
+import { type ChunkingOptions, splitText } from '../core/chunker.js';
 import type { Loader } from '../interfaces.js';
 import type { Chunk } from '../types.js';
-import { DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE, splitText, type ChunkingOptions } from '../core/chunker.js';
 
-const TEXT_EXTENSIONS = new Set(['.txt', '.md', '.markdown', '.csv', '.json', '.jsonl', '.log', '.yml', '.yaml']);
+const TEXT_EXTENSIONS = new Set([
+    '.txt',
+    '.md',
+    '.markdown',
+    '.csv',
+    '.json',
+    '.jsonl',
+    '.log',
+    '.yml',
+    '.yaml',
+]);
 
 export interface FileLoaderOptions extends ChunkingOptions {
     /** Extensions to include (with dot), default: common text formats */
@@ -31,7 +40,9 @@ export class FileLoader implements Loader {
     }
 
     private async listFiles(): Promise<string[]> {
-        const extensions = new Set((this.opts.extensions ?? [...TEXT_EXTENSIONS]).map((e) => e.toLowerCase()));
+        const extensions = new Set(
+            (this.opts.extensions ?? [...TEXT_EXTENSIONS]).map((e) => e.toLowerCase()),
+        );
         const files: string[] = [];
 
         const walk = async (p: string): Promise<void> => {
@@ -53,11 +64,16 @@ export class FileLoader implements Loader {
 
     async *getChunks(): AsyncGenerator<Chunk> {
         const files = await this.listFiles();
-        const rootDir = (await stat(this.path)).isDirectory() ? this.path : resolve(this.path, '..');
+        const rootDir = (await stat(this.path)).isDirectory()
+            ? this.path
+            : resolve(this.path, '..');
 
         for (const file of files) {
             const raw = await readFile(file, 'utf8');
-            const text = file.endsWith('.json') || file.endsWith('.jsonl') ? this.normalizeJson(file, raw) : raw;
+            const text =
+                file.endsWith('.json') || file.endsWith('.jsonl')
+                    ? this.normalizeJson(file, raw)
+                    : raw;
             if (!text.trim()) continue;
 
             const source = relative(rootDir, file) || file;

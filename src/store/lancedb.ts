@@ -1,4 +1,4 @@
-import { Index, connect, type Table } from '@lancedb/lancedb';
+import { connect, Index, type Table } from '@lancedb/lancedb';
 
 import type { VectorStore } from '../interfaces.js';
 import type { InsertChunk, ScoredChunk } from '../types.js';
@@ -97,7 +97,10 @@ export class LanceDBStore implements VectorStore {
         const results = await table.vectorSearch(query).distanceType('cosine').limit(k).toArray();
         return results.map((row) => {
             const distance = typeof row._distance === 'number' ? row._distance : Number.NaN;
-            return this.toScored(row as unknown as Record<string, unknown>, distanceToScore(distance, 'cosine'));
+            return this.toScored(
+                row as unknown as Record<string, unknown>,
+                distanceToScore(distance, 'cosine'),
+            );
         });
     }
 
@@ -139,7 +142,10 @@ export class LanceDBStore implements VectorStore {
         if (!ftsReady) return vectorHits.slice(0, k);
 
         try {
-            const ftsRows = await table.search(query, 'fts', ['pageContent']).limit(candidateK).toArray();
+            const ftsRows = await table
+                .search(query, 'fts', ['pageContent'])
+                .limit(candidateK)
+                .toArray();
             const ftsHits = ftsRows.map((row) =>
                 this.toScored(row as unknown as Record<string, unknown>, 0),
             );

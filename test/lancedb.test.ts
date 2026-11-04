@@ -24,7 +24,9 @@ describe('LanceDBStore (real embedded database)', () => {
 
     it('persists chunks and finds them by vector search', async () => {
         await rag.addText('Cats are small domesticated felines that purr.', { source: 'cats.md' });
-        await rag.addText('Diesel engines compress air before injecting fuel.', { source: 'engines.md' });
+        await rag.addText('Diesel engines compress air before injecting fuel.', {
+            source: 'engines.md',
+        });
 
         expect(await rag.getChunkCount()).toBe(2);
 
@@ -35,7 +37,9 @@ describe('LanceDBStore (real embedded database)', () => {
     });
 
     it('supports hybrid search (vector + full-text)', async () => {
-        await rag.addText('Kubernetes orchestrates containers across a cluster.', { source: 'k8s.md' });
+        await rag.addText('Kubernetes orchestrates containers across a cluster.', {
+            source: 'k8s.md',
+        });
         await rag.addText('Sourdough bread requires a starter culture of flour and water.', {
             source: 'bread.md',
         });

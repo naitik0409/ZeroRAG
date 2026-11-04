@@ -45,7 +45,10 @@ export class OpenAICompatibleAdapter implements LLMAdapter {
         if (opts?.maxTokens !== undefined) body.max_tokens = opts.maxTokens;
 
         const url = `${this.options.baseUrl.replace(/\/$/, '')}/chat/completions`;
-        return { url, init: { method: 'POST', headers, body: JSON.stringify(body) } as RequestInit };
+        return {
+            url,
+            init: { method: 'POST', headers, body: JSON.stringify(body) } as RequestInit,
+        };
     }
 
     async complete(messages: ChatMessage[], opts?: LLMOptions): Promise<string> {
@@ -54,11 +57,14 @@ export class OpenAICompatibleAdapter implements LLMAdapter {
         const res = await doFetch(url, init);
         if (!res.ok) {
             const text = await res.text().catch(() => '');
-            throw new Error(`OpenAI-compatible request failed (${res.status} ${res.statusText}): ${text.slice(0, 300)}`);
+            throw new Error(
+                `OpenAI-compatible request failed (${res.status} ${res.statusText}): ${text.slice(0, 300)}`,
+            );
         }
         const data = (await res.json()) as ChatCompletionChunk;
         const content = data.choices?.[0]?.message?.content;
-        if (typeof content !== 'string') throw new Error('OpenAI-compatible response missing choices[0].message.content');
+        if (typeof content !== 'string')
+            throw new Error('OpenAI-compatible response missing choices[0].message.content');
         return content;
     }
 
@@ -68,7 +74,9 @@ export class OpenAICompatibleAdapter implements LLMAdapter {
         const res = await doFetch(url, init);
         if (!res.ok || !res.body) {
             const text = await res.text().catch(() => '');
-            throw new Error(`OpenAI-compatible stream request failed (${res.status}): ${text.slice(0, 300)}`);
+            throw new Error(
+                `OpenAI-compatible stream request failed (${res.status}): ${text.slice(0, 300)}`,
+            );
         }
 
         const reader = res.body.getReader();

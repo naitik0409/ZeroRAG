@@ -6,7 +6,10 @@ export class FakeEmbedder implements EmbeddingProvider {
 
     private vector(text: string): number[] {
         const v = new Array<number>(this.dim).fill(0);
-        for (const token of text.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean)) {
+        for (const token of text
+            .toLowerCase()
+            .split(/[^a-z0-9]+/)
+            .filter(Boolean)) {
             let h = 2166136261;
             for (let i = 0; i < token.length; i++) {
                 h ^= token.charCodeAt(i);

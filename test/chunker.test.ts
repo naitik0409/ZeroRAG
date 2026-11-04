@@ -10,7 +10,9 @@ describe('splitText', () => {
     });
 
     it('splits long text into multiple overlapping chunks', async () => {
-        const text = Array.from({ length: 200 }, (_, i) => `sentence number ${i} about topic`).join(' ');
+        const text = Array.from({ length: 200 }, (_, i) => `sentence number ${i} about topic`).join(
+            ' ',
+        );
         const pieces = await splitText(text, { chunkSize: 80, chunkOverlap: 20 });
         expect(pieces.length).toBeGreaterThan(3);
         for (const piece of pieces) {

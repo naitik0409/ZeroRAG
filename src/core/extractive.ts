@@ -69,14 +69,20 @@ export async function extractiveAnswer(
 
     const topScore = ranked[0]?.score ?? 0;
     const cutoff = topScore * relativeThreshold;
-    const relevant = ranked.filter((r) => r.score >= cutoff && r.score > 0.05).slice(0, maxSentences);
+    const relevant = ranked
+        .filter((r) => r.score >= cutoff && r.score > 0.05)
+        .slice(0, maxSentences);
 
     // Degenerate case: everything scores ~0 (no signal) — fall back to first sentences
-    const picked = relevant.length > 0
-        ? relevant.sort((a, b) => a.order - b.order)
-        : candidates.slice(0, Math.min(maxSentences, candidates.length));
+    const picked =
+        relevant.length > 0
+            ? relevant.sort((a, b) => a.order - b.order)
+            : candidates.slice(0, Math.min(maxSentences, candidates.length));
 
-    const answer = picked.map((p) => p.text).join(' ').trim();
+    const answer = picked
+        .map((p) => p.text)
+        .join(' ')
+        .trim();
     const usedChunks = [...new Set(picked.map((p) => p.chunkIdx))].sort((a, b) => a - b);
     return { answer, usedChunks };
 }

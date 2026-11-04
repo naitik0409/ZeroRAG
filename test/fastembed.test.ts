@@ -10,7 +10,10 @@ describe('FastEmbedProvider (real local model)', () => {
         const dims = await provider.getDimensions();
         expect(dims).toBe(384);
 
-        const docs = await provider.embedDocuments(['hello world', 'retrieval augmented generation']);
+        const docs = await provider.embedDocuments([
+            'hello world',
+            'retrieval augmented generation',
+        ]);
         expect(docs).toHaveLength(2);
         expect(docs[0]).toHaveLength(384);
 
@@ -27,8 +30,7 @@ describe('FastEmbedProvider (real local model)', () => {
         ]);
         expect(a && b && c).toBeTruthy();
 
-        const dot = (x: number[], y: number[]) =>
-            x.reduce((s, v, i) => s + v * (y[i] ?? 0), 0);
+        const dot = (x: number[], y: number[]) => x.reduce((s, v, i) => s + v * (y[i] ?? 0), 0);
         const similar = dot(a!, b!);
         const dissimilar = dot(a!, c!);
         expect(similar).toBeGreaterThan(dissimilar);

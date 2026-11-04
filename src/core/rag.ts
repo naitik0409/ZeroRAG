@@ -1,10 +1,18 @@
-import type { EmbeddingProvider, LLMAdapter, Loader } from '../interfaces.js';
-import type { AskResult, Chunk, InsertChunk, LoaderResult, ScoredChunk, Source } from '../types.js';
 import { FastEmbedProvider } from '../embeddings/fastembed.js';
+import type { EmbeddingProvider, LLMAdapter, Loader, VectorStore } from '../interfaces.js';
 import { FileLoader } from '../loaders/file.js';
 import { TextLoader } from '../loaders/text.js';
+import { LiveSearch, type LiveSearchConfig } from '../search/live.js';
 import { LanceDBStore } from '../store/lancedb.js';
-import type { VectorStore } from '../interfaces.js';
+import type {
+    AskResult,
+    Chunk,
+    InsertChunk,
+    LoaderResult,
+    ScoredChunk,
+    SearchResult,
+    Source,
+} from '../types.js';
 import { extractiveAnswer } from './extractive.js';
 
 export interface ZeroRAGOptions {
@@ -14,11 +22,28 @@ export interface ZeroRAGOptions {
     store?: VectorStore;
     /** Bring-your-own LLM. When omitted, ask() runs in extractive (zero-LLM) mode. */
     llm?: LLMAdapter;
+    /**
+     * Enable keyless realtime web search. `true` = default providers
+     * (DuckDuckGo + Wikipedia); an object = custom LiveSearchConfig.
+     */
+    live?: boolean | LiveSearchConfig;
     chunkSize?: number;
     chunkOverlap?: number;
     topK?: number;
     systemMessage?: string;
     maxExtractiveSentences?: number;
+}
+
+export interface AskLiveOptions {
+    /** Fetch live web results and merge them into context. Default: false */
+    live?: boolean;
+    /** Max live web results to pull. Default: 5 */
+    maxLiveResults?: number;
+    /** Max live pages to fetch and extract for grounding. Default: 3 */
+    maxLivePages?: number;
+    /** Restrict live results to the last N days (freshness). */
+    freshWithinDays?: number;
+    maxSentences?: number;
 }
 
 const DEFAULT_SYSTEM_MESSAGE =
@@ -30,12 +55,16 @@ const INSERT_BATCH_SIZE = 64;
 
 export class ZeroRAG {
     private readonly seenLoaders = new Set<string>();
+    private readonly liveSearch: LiveSearch | null;
 
     private constructor(
         private readonly embedder: EmbeddingProvider,
         private readonly store: VectorStore,
         private readonly options: ZeroRAGOptions,
-    ) {}
+        liveSearch: LiveSearch | null,
+    ) {
+        this.liveSearch = liveSearch;
+    }
 
     /** Create and initialize a RAG instance with free, local defaults. */
     static async create(options: ZeroRAGOptions = {}): Promise<ZeroRAG> {
@@ -46,7 +75,11 @@ export class ZeroRAG {
         const store = options.store ?? new LanceDBStore();
         await store.init({ dimensions });
 
-        return new ZeroRAG(embedder, store, options);
+        const liveSearch = options.live
+            ? new LiveSearch(typeof options.live === 'object' ? options.live : {})
+            : null;
+
+        return new ZeroRAG(embedder, store, options, liveSearch);
     }
 
     async addText(
@@ -121,15 +154,33 @@ export class ZeroRAG {
         return this.store.search(queryVector, topK);
     }
 
+    /** Search the live web (keyless sources). Requires `live` at create() — or auto-enables defaults. */
+    async searchLive(
+        query: string,
+        opts: { maxResults?: number; freshWithinDays?: number } = {},
+    ): Promise<SearchResult[]> {
+        const live = this.liveSearch ?? new LiveSearch();
+        return live.search(query, opts);
+    }
+
     /**
      * Answer a question. Uses the configured LLM adapter when present,
      * otherwise falls back to zero-LLM extractive answering.
+     * Pass `{ live: true }` to ground the answer in fresh web results too.
      */
-    async ask(
-        query: string,
-        opts: { maxSentences?: number } = {},
-    ): Promise<AskResult> {
+    async ask(query: string, opts: AskLiveOptions = {}): Promise<AskResult> {
         const chunks = await this.search(query);
+
+        // Realtime grounding: prepend fresh web pages as high-priority context
+        if (opts.live && this.liveSearch) {
+            try {
+                const liveChunks = await this.fetchLiveChunks(query, opts);
+                chunks.unshift(...liveChunks);
+            } catch {
+                // Live layer is best-effort — degrade to index-only answers
+            }
+        }
+
         const sources = buildSources(chunks);
 
         if (!this.options.llm) {
@@ -157,6 +208,45 @@ export class ZeroRAG {
         return { answer, mode: 'llm', sources, chunks };
     }
 
+    /**
+     * Pull live web results, extract the top pages, and return them as
+     * ScoredChunks ranked above index results (fresh content wins).
+     */
+    private async fetchLiveChunks(query: string, opts: AskLiveOptions): Promise<ScoredChunk[]> {
+        const live = this.liveSearch;
+        if (!live) return [];
+
+        const results = await live.search(query, {
+            maxResults: opts.maxLiveResults ?? 5,
+            freshWithinDays: opts.freshWithinDays,
+        });
+        const pages = await Promise.all(
+            results
+                .slice(0, opts.maxLivePages ?? 3)
+                .map((url) => live.fetchPage(url.url).catch(() => null)),
+        );
+
+        const chunks: ScoredChunk[] = [];
+        pages.forEach((page, i) => {
+            if (!page?.text) return;
+            const result = results[i];
+            if (!result) return;
+            chunks.push({
+                pageContent: page.text,
+                metadata: {
+                    source: page.title || result.title,
+                    url: page.url,
+                    type: 'live',
+                    title: page.title ?? result.title,
+                    provider: result.provider,
+                    ...(result.date ? { date: result.date } : {}),
+                },
+                score: 1,
+            });
+        });
+        return chunks;
+    }
+
     async getChunkCount(): Promise<number> {
         return this.store.count();
     }
@@ -176,7 +266,8 @@ export class ZeroRAG {
 export function buildSources(chunks: ScoredChunk[]): Source[] {
     return chunks.map((chunk, i) => {
         const url = typeof chunk.metadata.url === 'string' ? chunk.metadata.url : undefined;
-        const label = typeof chunk.metadata.source === 'string' ? chunk.metadata.source : `chunk ${i + 1}`;
+        const label =
+            typeof chunk.metadata.source === 'string' ? chunk.metadata.source : `chunk ${i + 1}`;
         return {
             id: i + 1,
             label,
