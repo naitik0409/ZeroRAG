@@ -1,4 +1,4 @@
-﻿# Security Policy
+# Security Policy
 
 ## Supported versions
 
@@ -27,7 +27,7 @@ zerorag is designed to run **entirely on your machine**:
 - **No telemetry, no outbound calls except**: embedding model download (first run, from HuggingFace), your configured LLM endpoint, and keyless live-search sources (DuckDuckGo, Wikipedia, RSS feeds you configure) when you opt into `live`.
 - **Data stays local**: documents, chunks, and vectors are stored in `./.zerorag` on disk unless you provide a custom `VectorStore`.
 - **API keys are yours**: if you configure an LLM adapter with an `apiKey`, it is passed only to the endpoint you specify (or `baseUrl`).
-- **Untrusted content**: live web pages and ingested documents are treated as untrusted data. If you feed retrieved content to an LLM, standard prompt-injection precautions apply â€” consider constraining `systemMessage` and validating tool calls.
+- **Untrusted content**: live web pages and ingested documents are treated as untrusted data. If you feed retrieved content to an LLM, standard prompt-injection precautions apply — consider constraining `systemMessage` and validating tool calls.
 
 ## Scope
 

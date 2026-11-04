@@ -1,4 +1,4 @@
-﻿# Contributor Covenant Code of Conduct
+# Contributor Covenant Code of Conduct
 
 ## Our Pledge
 
@@ -68,13 +68,13 @@ reporter of any incident.
 Community leaders will follow these Community Impact Guidelines in determining
 the consequences for any action they deem in violation of this Code of Conduct:
 
-1. **Correction** â€” Private written warning, clarifying the nature of the
+1. **Correction** — Private written warning, clarifying the nature of the
    violation and why the behavior was inappropriate.
-2. **Warning** â€” Warning with consequences for continued behavior; may include
+2. **Warning** — Warning with consequences for continued behavior; may include
    a temporary ban from interaction.
-3. **Temporary Ban** â€” Temporary ban from any sort of interaction or public
+3. **Temporary Ban** — Temporary ban from any sort of interaction or public
    communication with the community.
-4. **Permanent Ban** â€” Permanent ban from any sort of public interaction.
+4. **Permanent Ban** — Permanent ban from any sort of public interaction.
 
 ## Attribution
 

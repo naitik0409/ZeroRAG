@@ -1,4 +1,4 @@
-﻿# Contributing to zerorag
+# Contributing to zerorag
 
 Thanks for your interest in improving zerorag! This document explains the workflow and quality gates.
 
@@ -41,7 +41,7 @@ npm run test        # must pass before you change anything
 
 ## Adding a live search provider
 
-Implement the `SearchProvider` interface â€” nothing else is needed:
+Implement the `SearchProvider` interface — nothing else is needed:
 
 ```ts
 import type { SearchProvider, SearchResult } from 'zerorag';
@@ -56,7 +56,7 @@ export class MyProvider implements SearchProvider {
 }
 ```
 
-Then wire it into `new LiveSearch({ providers: [new MyProvider()] })`. Add a test with a mocked `fetchImpl` â€” never hit the network in the default test suite.
+Then wire it into `new LiveSearch({ providers: [new MyProvider()] })`. Add a test with a mocked `fetchImpl` — never hit the network in the default test suite.
 
 ## Adding an LLM adapter
 
@@ -68,4 +68,4 @@ Conventional commits preferred: `feat:`, `fix:`, `docs:`, `test:`, `chore:`, `re
 
 ## Questions
 
-Open a discussion issue. Maintainer response time is best-effort â€” this is a free, community project.
+Open a discussion issue. Maintainer response time is best-effort — this is a free, community project.
