@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# zerorag runtime data (embedded LanceDB databases)
+.zerorag/
+.zerorag-*/
+
+# Scratch & reference material (not part of the package)
+upstream/
+smoke/data/
+
+# Secrets / env
+.env
+.env.*
+
+# Coverage & logs
+coverage/
+*.log
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
