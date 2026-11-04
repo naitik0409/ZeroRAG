@@ -1,5 +1,6 @@
 // Core
 
+export { SafeSearchType, SearchTimeType } from 'duck-duck-scrape';
 export {
     type ChunkingOptions,
     DEFAULT_CHUNK_OVERLAP,

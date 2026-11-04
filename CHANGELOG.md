@@ -23,7 +23,7 @@ Initial release.
   - `RssProvider` (any RSS/Atom feeds, relevance + recency ranking)
   - `ZeroRAG.searchLive()` and `ask({ live: true })` for web-grounded answers with citations
 - **Utilities** — `htmlToText`, `tokenize`, `cosineSimilarity`, `lexicalOverlap`, `fuseResults`, `normalizeUrl`, `defineConfig`
-- **Build & tooling** — TypeScript strict (`noUncheckedIndexedAccess`), tsup dual ESM/CJS + declaration builds, Vitest suite (57 tests), Biome lint/format, GitHub Actions CI + npm release workflow
+- **Build & tooling** — TypeScript strict (`noUncheckedIndexedAccess`), tsup dual ESM/CJS + declaration builds, Vitest suite (58 tests), Biome lint/format, GitHub Actions CI + npm release workflow
 
 ### Notes
 

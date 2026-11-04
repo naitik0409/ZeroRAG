@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/zerorag.svg?label=zerorag)](https://www.npmjs.com/package/zerorag)
 [![license](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
-[![tests](https://img.shields.io/badge/tests-57%20passing-brightgreen.svg)](#development)
+[![tests](https://img.shields.io/badge/tests-58%20passing-brightgreen.svg)](#development)
 
 **Zero API keys. Zero cloud accounts. Zero usage bills.**
 
@@ -14,7 +14,9 @@
 - **Realtime web** — DuckDuckGo + Wikipedia + RSS, all keyless, with circuit breakers and caching
 - **Bring-your-own LLM** — OpenAI-compatible, Ollama, Anthropic, Gemini adapters, or extractive zero-LLM answers
 - **Zero-LLM mode** — extractive answering scores sentences against the query; works fully offline
-- **Typed & tested** — TypeScript strict, ESM + CJS builds, 57 unit tests
+- **Typed & tested** — TypeScript strict, ESM + CJS builds, 58 unit tests
+
+> **📖 Full detailed guide: [docs/USAGE.md](docs/USAGE.md)** — every API, all adapters, live search, custom providers, recipes, and troubleshooting.
 
 ---
 
@@ -181,13 +183,16 @@ Everything behind an interface (`EmbeddingProvider`, `VectorStore`, `LLMAdapter`
 npm install
 npm run typecheck      # tsc --noEmit (strict, noUncheckedIndexedAccess)
 npm run lint           # biome check
-npm run test           # vitest (57 tests, offline)
+npm run test           # vitest (58 tests, offline)
 npm run build          # tsup → dist/ (ESM + CJS + .d.ts)
-npm run example        # end-to-end demo, zero keys
+npm run example        # offline end-to-end demo, zero keys
+npm run example:live   # keyless realtime web demo (needs network)
 ```
 
 Network-gated checks (live DDG) run separately; the default suite is fully offline except first-run model download.
 
 ## Credits & license
+
+**Developed and maintained by [Naitik](https://github.com/naitik0409).**
 
 Apache-2.0. Interfaces, chunking orchestration, and design patterns are derived from [**EmbedJs**](https://github.com/llm-tools/embedJs) (Apache-2.0) — see `NOTICE`. All other code is original to this project.

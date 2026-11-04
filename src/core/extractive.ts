@@ -20,6 +20,13 @@ export interface ExtractiveOptions {
      * embeddings where unrelated sentences still score ~0.4 cosine.
      */
     relativeThreshold?: number;
+    /**
+     * Max sentences sent to the embedder. When there are more candidates,
+     * a cheap lexical prefilter narrows them first (top lexical hits plus
+     * the opening sentences) so huge live pages stay fast on any hardware.
+     * Defaults to 48.
+     */
+    maxEmbedCandidates?: number;
 }
 
 export interface ExtractiveResult {
@@ -56,10 +63,30 @@ export async function extractiveAnswer(
     });
     if (candidates.length === 0) return { answer: '', usedChunks: [] };
 
-    const vectors = await embedder.embedDocuments(candidates.map((c) => c.text));
+    // Prefilter: embedding is the expensive step — only rank a bounded set
+    const embedLimit = opts.maxEmbedCandidates ?? 48;
+    let toScore = candidates;
+    if (candidates.length > embedLimit) {
+        const leadCount = Math.min(8, embedLimit);
+        const lexicalTop = candidates
+            .map((c, idx) => ({ idx, lex: lexicalOverlap(query, c.text) }))
+            .sort((a, b) => b.lex - a.lex)
+            .slice(0, embedLimit - leadCount)
+            .map((x) => x.idx);
+        const keep = new Set<number>([
+            ...Array.from({ length: leadCount }, (_, i) => i),
+            ...lexicalTop,
+        ]);
+        toScore = [...keep]
+            .sort((a, b) => a - b)
+            .map((idx) => candidates[idx])
+            .filter((c): c is (typeof candidates)[number] => c !== undefined);
+    }
+
+    const vectors = await embedder.embedDocuments(toScore.map((c) => c.text));
     const queryVector = await embedder.embedQuery(query);
 
-    const ranked = candidates
+    const ranked = toScore
         .map((c, i) => {
             const semantic = cosineSimilarity(queryVector, vectors[i] ?? []);
             const lexical = lexicalOverlap(query, c.text);

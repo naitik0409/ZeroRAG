@@ -55,4 +55,27 @@ describe('extractiveAnswer', () => {
         const sentenceCount = result.answer.split(/[.!?]/).filter((s) => s.trim()).length;
         expect(sentenceCount).toBeLessThanOrEqual(2);
     });
+
+    it('prefilters large candidate sets but keeps lexically relevant sentences', async () => {
+        const filler = Array.from(
+            { length: 100 },
+            (_, i) => `Filler sentence number ${i} about nothing in particular.`,
+        ).join(' ');
+        const big: ScoredChunk[] = [
+            {
+                pageContent: `Lead sentence about lemons. ${filler} The solar system has eight planets orbiting the sun.`,
+                metadata: { source: 'big.md' },
+                score: 1,
+            },
+        ];
+
+        const result = await extractiveAnswer(
+            'How many planets are in the solar system?',
+            big,
+            new FakeEmbedder(),
+            { maxEmbedCandidates: 12, maxSentences: 3 },
+        );
+        expect(result.answer).toContain('solar system');
+        expect(result.answer).not.toContain('Filler sentence number 73');
+    });
 });
