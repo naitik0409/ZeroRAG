@@ -1,4 +1,4 @@
-# zerorag
+# ZeroRAG
 
 > **Free realtime RAG for Node.js** — local embeddings, hybrid vector+keyword search, keyless live web sources, bring-your-own LLM. **$0 API cost, forever.**
 
